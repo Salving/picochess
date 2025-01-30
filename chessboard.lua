@@ -12,7 +12,7 @@ pickedPieceMoves = {}
 
 board = {}
 
-pieceSprites = { [0] = 64, 66, 68, 70, 72, 74 }
+pieceSprites = { [0] = 64, 66, 68, 70, 72, 74, 76}
 pieces = {}
 PIECE_PAWN = 0
 PIECE_ROOK = 1

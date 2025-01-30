@@ -12,7 +12,7 @@ function _init()
 
     menuitem(2, "change projection", flipProjection)
     
-    playerHand = generateRandomHand(3)
+    playerHand = generateRandomHand(6)
 
     initBoard()
     initDefaultPieces()

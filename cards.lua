@@ -20,15 +20,25 @@ CARD_TYPE_WALL = 3
 
 ---@param pieceType number
 ---@return Card
-function createCard(pieceType, cardType)
-    return { pieceType = pieceType, cardType = cardType }
+function createCard(pieceType, cardType, targetType)
+    return { pieceType = pieceType, cardType = cardType, targetType = targetType }
 end
 
 function generateRandomHand(size)
     local hand = {}
-    for i = 1, size do
-        local type = flr(rnd(6))
-        add(hand, createCard(type))
+    while #hand < size do
+        local pieceType = flr(rnd(PIECE_KING + 1))
+        local cardType = flr(rnd(CARD_TYPE_WALL + 1))
+        local targetType = flr(rnd(PIECE_KING + 1))
+
+        if pieceType == targetType or
+                cardType == CARD_TYPE_CONVERT and pieceType == PIECE_KING or
+                cardType == CARD_TYPE_CONVERT and targetType == PIECE_KING then
+            goto continue
+        end
+
+        add(hand, createCard(pieceType, cardType, targetType))
+        :: continue ::
     end
 
     return hand
@@ -37,8 +47,17 @@ end
 function drawHand(hand)
     local handSize = #hand
     cardStartX = 40 - (cardWidth / 2) * handSize
+    local selectedIndex = nil
     for i, card in ipairs(hand) do
-        drawCard(cardStartX + i * cardOffset, cardStartY, card)
+        if card ~= selectedCard then
+            drawCard(cardStartX + i * cardOffset, cardStartY, card)
+        else
+            selectedIndex = i
+        end
+    end
+
+    if selectedCard then
+        drawCard(cardStartX + selectedIndex * cardOffset, cardStartY, selectedCard)
     end
 end
 
@@ -46,6 +65,7 @@ function drawCard(x, y, card)
     if card == selectedCard then
         y = y - 8
     end
+
     if card == pickedCard then
         pal(15, 13)
     end
@@ -53,7 +73,27 @@ function drawCard(x, y, card)
     spr(4, x, y, 4, 4)
     pal()
 
-    spr(pieceSprites[card.pieceType], x + cardWidth / 4, y + cardHeight / 2.5, 2, 2)
+    if card.cardType == CARD_TYPE_WALL then
+        spr(pieceSprites[PIECE_WALL], x + cardWidth / 4 + 1, y + cardHeight / 2.5, 2, 2)
+    else
+        -- Draw piece type
+        spr(pieceSprites[card.pieceType], x + cardWidth / 4 - 6, y + cardHeight / 2.5, 2, 2)
+    end
+
+    if card.cardType == CARD_TYPE_CONVERT then
+        -- Draw target type
+        spr(pieceSprites[card.targetType], x + cardWidth / 4 + 7, y + cardHeight / 2.5, 2, 2)
+    end
+
+    if card.cardType == CARD_TYPE_NUDGE then
+        -- Draw "One"
+        spr(16, x + cardWidth / 4 + 10, y + cardHeight / 2, 1, 1)
+    end
+
+    if card.cardType > 0 and card.cardType < 3 then
+        -- Draw arrow
+        spr(1, x + cardWidth / 2 - 3, y + cardHeight / 2, 1, 1)
+    end
 end
 
 function screenToCard(x, y)

@@ -1,0 +1,5 @@
+﻿TURN_NULL = 0
+TURN_PLAYER = 1
+TURN_ENEMY = 2
+
+currentTurn = TURN_NULL

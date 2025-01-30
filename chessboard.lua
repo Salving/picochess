@@ -5,8 +5,10 @@ gridStartY = 64
 tileWidth = 8
 tileHeight = 8
 
-tileColors = { [0] = 13, 15, 3 }
+tileColors = { [0] = 13, 15, 3, 9 }
 selectedTile = { x = 0, y = 0 }
+pickedPiece = nil
+pickedPieceMoves = {}
 
 board = {}
 
@@ -18,6 +20,9 @@ PIECE_BISHOP = 2
 PIECE_KNIGHT = 3
 PIECE_QUEEN = 4
 PIECE_KING = 5
+pieceMoves = {}
+
+---@class Piece:table {x, y, type, side}
 
 function initBoard()
     for x = 0, 7 do
@@ -26,6 +31,15 @@ function initBoard()
             board[x][y] = (x + y) % 2
         end
     end
+
+    pieceMoves = {
+        [PIECE_PAWN] = pawnMoves,
+        [PIECE_ROOK] = rookMove,
+        [PIECE_BISHOP] = bishopMoves,
+        [PIECE_KNIGHT] = knightMoves,
+        [PIECE_QUEEN] = queenMoves,
+        [PIECE_KING] = kingMoves,
+    }
 end
 
 function clearBoard()
@@ -39,7 +53,11 @@ end
 function drawBoard()
     for gridX, row in pairs(board) do
         for gridY, v in pairs(row) do
-            drawTile(gridX * 8, gridY * 8, tileColors[v])
+            local color = tileColors[v]
+            if color == 9 then
+                color = color - (gridX + gridY) % 2
+            end
+            drawTile(gridX * 8, gridY * 8, color)
         end
     end
 end
@@ -112,11 +130,22 @@ function initDefaultPieces()
     end
 end
 
+---@param x number
+---@param y number
+---@param type number
+---@param side boolean
+---@return Piece
 function createPiece(x, y, type, side)
     return { x = x, y = y, type = type, side = side }
 end
 
 function movePiece(piece, x, y)
+    local foundPiece, i = findPiece(x, y)
+
+    if foundPiece then
+        del(pieces, foundPiece)
+    end
+
     piece.x = x
     piece.y = y
 end
@@ -149,6 +178,127 @@ end
 
 function withinBoard(x, y)
     return x >= 0 and x < 8 and y >= 0 and y < 8
+end
+
+function possibleMoves(piece)
+    if piece == nil then
+        return {}
+    end
+    return pieceMoves[piece.type](piece)
+end
+
+function pawnMoves(piece)
+    local offset = 1
+    if piece.side then
+        offset = -1
+    end
+
+    local x, y = piece.x, piece.y
+    y = y + offset
+    local moves = {}
+
+    for i = -1, 1 do
+        local foundPiece = findPiece(x + i, y)
+        if withinBoard(x + i, y) then
+            if i == 0 or i == 1 and foundPiece then
+                add(moves, { x = x, y = y })
+            end
+        end
+    end
+
+    return moves
+end
+
+function offsetMoves(piece, offsets, distance)
+    distance = distance or 7
+    local moves = {}
+    for _, offset in pairs(offsets) do
+        for i = 1, distance do
+            local x = piece.x + offset[1] * i
+            local y = piece.y + offset[2] * i
+            local foundPiece = findPiece(x, y)
+            if foundPiece then
+                if foundPiece.side ~= piece.side then
+                    add(moves, {x = x, y = y})
+                end
+                goto continue
+            end
+
+            if withinBoard(x, y) then
+                add(moves, { x = x, y = y })
+            end
+        end
+        :: continue ::
+    end
+
+    return moves
+end
+
+function rookMove(piece)
+    local offsets = {
+        { -1, 0 },
+        { 0, -1 },
+        { 1, 0 },
+        { 0, 1 },
+    }
+
+    return offsetMoves(piece, offsets)
+end
+
+function bishopMoves(piece)
+    local offsets = {
+        { -1, -1 },
+        { -1, 1},
+        { 1, -1 },
+        { 1, 1 },
+    }
+
+    return offsetMoves(piece, offsets)
+end
+
+function knightMoves(piece)
+    local offsets = {
+        { -2, -1 },
+        { -2, 1},
+        { 2, -1 },
+        { 2, 1 },
+        { -1, -2 },
+        { 1, -2 },
+        { -1, 2 },
+        { 1, 2 },
+    }
+
+    return offsetMoves(piece, offsets, 1)
+end
+
+function queenMoves(piece)
+    local offsets = {
+        { -1, -1 },
+        { -1, 1},
+        { 1, -1 },
+        { 1, 1 },
+        { -1, 0 },
+        { 0, -1 },
+        { 1, 0 },
+        { 0, 1 },
+    }
+    
+    return offsetMoves(piece, offsets)
+end
+
+function kingMoves(piece)
+    local offsets = {
+        { -1, -1 },
+        { -1, 1},
+        { 1, -1 },
+        { 1, 1 },
+        { -1, 0 },
+        { 0, -1 },
+        { 1, 0 },
+        { 0, 1 },
+    }
+    
+    return offsetMoves(piece, offsets, 1)
 end
 
 function flipProjection()

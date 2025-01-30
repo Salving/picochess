@@ -7,12 +7,13 @@ tileHeight = 8
 
 tileColors = { [0] = 13, 15, 3, 9 }
 selectedTile = { x = 0, y = 0 }
+selectablePieces = {}
 pickedPiece = nil
 pickedPieceMoves = {}
 
 board = {}
 
-pieceSprites = { [0] = 64, 66, 68, 70, 72, 74, 76}
+pieceSprites = { [0] = 64, 66, 68, 70, 72, 74, 76 }
 pieces = {}
 PIECE_PAWN = 0
 PIECE_ROOK = 1
@@ -103,7 +104,9 @@ function drawPiece(piece)
         pal(7, 1, 0)
         pal(6, 13, 0)
         pal(5, 0, 0)
-    end 
+    elseif selectablePieces[piece] then
+        pal(5, 3)
+    end
 
     spr(pieceSprites[piece.type], scrX - 8, scrY - 4, 2, 2, flip)
     pal()
@@ -183,11 +186,22 @@ function withinBoard(x, y)
     return x >= 0 and x < 8 and y >= 0 and y < 8
 end
 
-function possibleMoves(piece)
-    if piece == nil then
+function possibleMoves(piece, card)
+    if card == nil or card.cardType ~= CARD_TYPE_WALL and piece == nil then
         return {}
     end
-    return pieceMoves[piece.type](piece)
+
+    if card.cardType == CARD_TYPE_MOVE then
+        return pieceMoves[piece.type](piece, card)
+    elseif card.cardType == CARD_TYPE_NUDGE then
+        return kingMoves(piece)
+    elseif card.cardType == CARD_TYPE_CONVERT then
+        return { { x = piece.x, y = piece.y } }
+    elseif card.cardType == CARD_TYPE_WALL then
+        return wallMoves()
+    end
+
+    return {}
 end
 
 function pawnMoves(piece)
@@ -302,6 +316,19 @@ function kingMoves(piece)
     }
 
     return offsetMoves(piece, offsets, 1)
+end
+
+function wallMoves()
+    local allMoves = {}
+    for x, row in pairs(board) do
+        for y, v in pairs(row) do
+            if findPiece(x, y) == nil then
+                add(allMoves, { x = x, y = y })
+            end
+        end
+    end
+
+    return allMoves
 end
 
 function flipProjection()

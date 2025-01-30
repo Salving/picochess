@@ -11,12 +11,17 @@ pickedCard = nil
 
 playerHand = {}
 
+CARD_TYPE_MOVE = 0
+CARD_TYPE_CONVERT = 1
+CARD_TYPE_NUDGE = 2
+CARD_TYPE_WALL = 3
+
 ---@class Card:table {pieceType}
 
 ---@param pieceType number
 ---@return Card
-function createCard(pieceType) 
-    return {pieceType=pieceType}
+function createCard(pieceType, cardType)
+    return { pieceType = pieceType, cardType = cardType }
 end
 
 function generateRandomHand(size)
@@ -25,7 +30,7 @@ function generateRandomHand(size)
         local type = flr(rnd(6))
         add(hand, createCard(type))
     end
-    
+
     return hand
 end
 
@@ -44,10 +49,10 @@ function drawCard(x, y, card)
     if card == pickedCard then
         pal(15, 13)
     end
-    
+
     spr(4, x, y, 4, 4)
     pal()
-    
+
     spr(pieceSprites[card.pieceType], x + cardWidth / 4, y + cardHeight / 2.5, 2, 2)
 end
 
@@ -57,10 +62,10 @@ function screenToCard(x, y)
     if y < cardStartY or y > cardStartY + cardHeight then
         return nil
     end
-    
-    if cardIndex >=0 and cardIndex <= handSize then
+
+    if cardIndex >= 0 and cardIndex <= handSize then
         return playerHand[cardIndex]
     end
-    
+
     return nil
 end

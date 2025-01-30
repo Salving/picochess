@@ -20,6 +20,7 @@ PIECE_BISHOP = 2
 PIECE_KNIGHT = 3
 PIECE_QUEEN = 4
 PIECE_KING = 5
+PIECE_WALL = 6
 pieceMoves = {}
 
 ---@class Piece:table {x, y, type, side}
@@ -90,17 +91,19 @@ function drawPiece(piece)
     local x = piece.x
     local y = piece.y
     local scrX, scrY = isoToScreen(x * tileWidth, y * tileHeight)
+
     if piece == pickedPiece then
+        ovalfill(scrX - 5, scrY + 11, scrX + 4, scrY + 13, 1)
         scrY = scrY - (3 * (cos(time() / 2) + 1))
     end
 
     local flip = false
-    if not piece.side then
+    if piece.side == 0 then
         flip = true
         pal(7, 1, 0)
         pal(6, 13, 0)
         pal(5, 0, 0)
-    end
+    end 
 
     spr(pieceSprites[piece.type], scrX - 8, scrY - 4, 2, 2, flip)
     pal()
@@ -108,24 +111,24 @@ end
 
 function initDefaultPieces()
     for i = 0, 7 do
-        add(pieces, createPiece(i, 1, PIECE_PAWN, false))
-        add(pieces, createPiece(i, 6, PIECE_PAWN, true))
+        add(pieces, createPiece(i, 1, PIECE_PAWN, 0))
+        add(pieces, createPiece(i, 6, PIECE_PAWN, 1))
 
         if i == 0 or i == 7 then
-            add(pieces, createPiece(i, 0, PIECE_ROOK, false))
-            add(pieces, createPiece(i, 7, PIECE_ROOK, true))
+            add(pieces, createPiece(i, 0, PIECE_ROOK, 0))
+            add(pieces, createPiece(i, 7, PIECE_ROOK, 1))
         elseif i == 1 or i == 6 then
-            add(pieces, createPiece(i, 0, PIECE_KNIGHT, false))
-            add(pieces, createPiece(i, 7, PIECE_KNIGHT, true))
+            add(pieces, createPiece(i, 0, PIECE_KNIGHT, 0))
+            add(pieces, createPiece(i, 7, PIECE_KNIGHT, 1))
         elseif i == 2 or i == 5 then
-            add(pieces, createPiece(i, 0, PIECE_BISHOP, false))
-            add(pieces, createPiece(i, 7, PIECE_BISHOP, true))
+            add(pieces, createPiece(i, 0, PIECE_BISHOP, 0))
+            add(pieces, createPiece(i, 7, PIECE_BISHOP, 1))
         elseif i == 3 then
-            add(pieces, createPiece(i, 0, PIECE_QUEEN, false))
-            add(pieces, createPiece(i, 7, PIECE_QUEEN, true))
+            add(pieces, createPiece(i, 0, PIECE_QUEEN, 0))
+            add(pieces, createPiece(i, 7, PIECE_QUEEN, 1))
         else
-            add(pieces, createPiece(i, 0, PIECE_KING, false))
-            add(pieces, createPiece(i, 7, PIECE_KING, true))
+            add(pieces, createPiece(i, 0, PIECE_KING, 0))
+            add(pieces, createPiece(i, 7, PIECE_KING, 1))
         end
     end
 end
@@ -133,7 +136,7 @@ end
 ---@param x number
 ---@param y number
 ---@param type number
----@param side boolean
+---@param side number
 ---@return Piece
 function createPiece(x, y, type, side)
     return { x = x, y = y, type = type, side = side }
@@ -189,7 +192,7 @@ end
 
 function pawnMoves(piece)
     local offset = 1
-    if piece.side then
+    if piece.side == 1 then
         offset = -1
     end
 
@@ -219,7 +222,7 @@ function offsetMoves(piece, offsets, distance)
             local foundPiece = findPiece(x, y)
             if foundPiece then
                 if foundPiece.side ~= piece.side then
-                    add(moves, {x = x, y = y})
+                    add(moves, { x = x, y = y })
                 end
                 goto continue
             end
@@ -248,7 +251,7 @@ end
 function bishopMoves(piece)
     local offsets = {
         { -1, -1 },
-        { -1, 1},
+        { -1, 1 },
         { 1, -1 },
         { 1, 1 },
     }
@@ -259,7 +262,7 @@ end
 function knightMoves(piece)
     local offsets = {
         { -2, -1 },
-        { -2, 1},
+        { -2, 1 },
         { 2, -1 },
         { 2, 1 },
         { -1, -2 },
@@ -274,7 +277,7 @@ end
 function queenMoves(piece)
     local offsets = {
         { -1, -1 },
-        { -1, 1},
+        { -1, 1 },
         { 1, -1 },
         { 1, 1 },
         { -1, 0 },
@@ -282,14 +285,14 @@ function queenMoves(piece)
         { 1, 0 },
         { 0, 1 },
     }
-    
+
     return offsetMoves(piece, offsets)
 end
 
 function kingMoves(piece)
     local offsets = {
         { -1, -1 },
-        { -1, 1},
+        { -1, 1 },
         { 1, -1 },
         { 1, 1 },
         { -1, 0 },
@@ -297,7 +300,7 @@ function kingMoves(piece)
         { 1, 0 },
         { 0, 1 },
     }
-    
+
     return offsetMoves(piece, offsets, 1)
 end
 

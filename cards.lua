@@ -27,8 +27,10 @@ end
 function generateRandomHand(size)
     local hand = {}
     while #hand < size do
-        local pieceType = flr(rnd(PIECE_KING + 1))
-        local cardType = flr(rnd(CARD_TYPE_WALL + 1))
+        local v = rnd(PIECE_KING)
+        local pieceType = flr((v * v + 3) / 5)
+        v = rnd(CARD_TYPE_WALL )
+        local cardType = flr((v * v + 2) / 3 )
         local targetType = flr(rnd(PIECE_KING + 1))
 
         if pieceType == targetType or
@@ -67,11 +69,11 @@ function drawCard(x, y, card)
     end
 
     if card == pickedCard then
-        pal(15, 13)
+        pal(13, 7)
     end
 
     spr(4, x, y, 4, 4)
-    pal()
+    resetPal()
 
     if card.cardType == CARD_TYPE_WALL then
         spr(pieceSprites[PIECE_WALL], x + cardWidth / 4 + 1, y + cardHeight / 2.5, 2, 2)

@@ -5,7 +5,7 @@ gridStartY = 64
 tileWidth = 8
 tileHeight = 8
 
-tileColors = { [0] = 13, 15, 3, 9 }
+tileColors = { [0] = 13, 7, 11, 9 }
 selectedTile = { x = 0, y = 0 }
 selectablePieces = {}
 pickedPiece = nil
@@ -13,12 +13,12 @@ pickedPieceMoves = {}
 
 board = {}
 
-pieceSprites = { [0] = 64, 66, 68, 70, 72, 74, 76 }
+pieceSprites = { [0] = 64, 70, 68, 66, 72, 74, 76 }
 pieces = {}
 PIECE_PAWN = 0
-PIECE_ROOK = 1
+PIECE_KNIGHT = 1
 PIECE_BISHOP = 2
-PIECE_KNIGHT = 3
+PIECE_ROOK = 3
 PIECE_QUEEN = 4
 PIECE_KING = 5
 PIECE_WALL = 6
@@ -101,15 +101,16 @@ function drawPiece(piece)
     local flip = false
     if piece.side == 0 then
         flip = true
-        pal(7, 1, 0)
-        pal(6, 13, 0)
-        pal(5, 0, 0)
+        pal(15, 12, 0)
+        pal(6, 2, 0)
+        pal(5, 1, 0)
     elseif selectablePieces[piece] then
-        pal(5, 3)
+        pal(5, 11)
     end
 
     spr(pieceSprites[piece.type], scrX - 8, scrY - 4, 2, 2, flip)
     pal()
+    resetPal()
 end
 
 function initDefaultPieces()
@@ -217,7 +218,9 @@ function pawnMoves(piece)
     for i = -1, 1 do
         local foundPiece = findPiece(x + i, y)
         if withinBoard(x + i, y) then
-            if i == 0 or i == 1 and foundPiece then
+            if foundPiece and (i == -1 or i == 1) then
+                add(moves, { x = x + i, y = y })
+            elseif i == 0 and not foundPiece then
                 add(moves, { x = x, y = y })
             end
         end

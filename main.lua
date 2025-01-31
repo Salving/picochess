@@ -9,6 +9,10 @@ currentScene = menuScene
 playerPieceCount = 0
 enemyPieceCount = 0
 
+shakeX, shakeY = 0, 0
+shakeStartTime = -1000
+shakeAmplitude = 0.125
+
 function changeScene(scene)
     currentScene.clean()
     currentScene = scene
@@ -22,15 +26,17 @@ function gameInit()
     currentTurn = TURN_PLAYER
 
     playerHand = generateRandomHand(3)
-    
+
     initBoard()
     initDefaultPieces()
+    
+    music(10, 100)
 end
 
 function gameUpdate()
     cameraOffsetX = (mouseX - 64) * 2
     cameraOffsetY = mouseY
-    camera(cameraOffsetX, cameraOffsetY)
+    camera(cameraOffsetX + shakeX * shakeAmplitude, cameraOffsetY + shakeY * shakeAmplitude)
 
     clearBoard()
 
@@ -69,7 +75,7 @@ function gameDraw()
     drawBoard()
     renderPieces()
     renderButtons()
-    
+
     print(playerPieceCount, 8 + cameraOffsetX, 2 + cameraOffsetY, 14)
     print(enemyPieceCount, 120 + cameraOffsetX, 2 + cameraOffsetY, 14)
 
@@ -79,7 +85,7 @@ function gameDraw()
 
     -- Cursor
     spr(0, mouseX + cameraOffsetX, mouseY + cameraOffsetY)
-    
+
     distort()
 end
 
@@ -126,6 +132,9 @@ end
 
 function _update()
     mouseX, mouseY = mousePos()
+    
+    shakeX = flr(cos(t() * 3) / ((t() - shakeStartTime) * 10) + 0.5)
+    shakeY = flr(cos(t() * t()) / ((t() - shakeStartTime) * 10) + 0.5)
 
     currentScene.update()
 end
@@ -149,7 +158,9 @@ function updateBoard()
         if pickedCard ~= nil and
                 withinBoard(tileX, tileY) and
                 canMove(tileX, tileY, pickedPieceMoves) then
+            placeSound()
             makeTurn(pickedCard, playerHand, pickedPiece, tileX, tileY)
+            shakeStartTime = t()
             clearSelect()
             return
         end
@@ -159,6 +170,7 @@ function updateBoard()
         if piece and selectablePieces[piece]
         --and piece.side
         then
+            pickupSound()
             pickedPiece = piece
         end
     end
@@ -171,6 +183,7 @@ function updateCards()
 
     if btnp(5) then
         if selectedCard then
+            pickupSound()
             pickedCard = selectedCard
             pickedPiece = nil
         end
@@ -224,7 +237,12 @@ function checkGameEnd()
 end
 
 function updateUI()
-    selectedButton = getButton(mouseX + cameraOffsetX, mouseY + cameraOffsetY)
+    local newSelected = getButton(mouseX + cameraOffsetX, mouseY + cameraOffsetY)
+    if newSelected and newSelected ~= selectedButton then
+        buttonSelectSound()
+    end
+    
+    selectedButton = newSelected
     if btnp(5) and selectedButton then
         selectedButton.action()
     end

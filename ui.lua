@@ -14,7 +14,14 @@ local buttonBorder = 5
 ---@param text string
 ---@param action function
 function createButton(x, y, width, height, text, action)
-    return { x = x, y = y, width = width, height = height, text = text, action = action }
+    return { x = x, y = y, width = width, height = height, text = text, action = function()
+        pressButton(action)
+    end }
+end
+
+function pressButton(action)
+    buttonPressSound()
+    action()
 end
 
 ---getButton
@@ -41,18 +48,18 @@ end
 function renderButton(button)
     local x, y = button.x, button.y
     -- Shadow
-    rectfill(x - 2, y + 2, x + button.width, y + button.height  + 3, buttonShadow)
+    rectfill(x - 2, y + 2, x + button.width, y + button.height + 3, buttonShadow)
 
     if button == selectedButton then
         y = y - 4
     end
     -- Border
-    rect(x-1, y-1, x + button.width + 1, y + button.height + 1, buttonBorder)
+    rect(x - 1, y - 1, x + button.width + 1, y + button.height + 1, buttonBorder)
     -- Background
     rectfill(x, y, x + button.width, y + button.height, buttonBackground)
-    
-    print(button.text, 
-            x + button.width / 2 - #button.text * 4, 
-            y + button.height / 2 - 2, 
+
+    print(button.text,
+            x + button.width / 2 - #button.text * 4,
+            y + button.height / 2 - 2,
             buttonForeground)
 end

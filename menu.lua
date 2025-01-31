@@ -5,6 +5,7 @@ local droplets = {}
 function menuInit()
     add(buttons, createButton(86, 48, 30, 15, "\250\229", startGame))
     add(buttons, createButton(86, 48 + 32, 30, 15, "\243п", stopGame))
+    add(buttons, createButton(124, 124, 10, 10, "?", secretButton))
 
     for i = 1, 7 do
         add(droplets, { x = rnd(128), y = i * -32 })
@@ -13,13 +14,12 @@ function menuInit()
     cameraOffsetX = 0
     cameraOffsetY = 0
     camera(0, 0)
+    
+    music(8)
 end
 
 function menuUpdate()
-    selectedButton = getButton(mouseX, mouseY)
-    if btnp(5) and selectedButton then
-        selectedButton.action()
-    end
+    updateUI()
 end
 
 function menuDraw()
@@ -89,4 +89,8 @@ function stopGame()
     cls(0)
     extcmd("shutdown")
     stop()
+end
+
+function secretButton()
+    music(1,  100)
 end

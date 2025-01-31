@@ -151,6 +151,7 @@ function movePiece(piece, x, y)
 
     if foundPiece then
         del(pieces, foundPiece)
+        damageSound()
     end
 
     piece.x = x

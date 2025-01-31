@@ -218,7 +218,8 @@ function pawnMoves(piece)
     for i = -1, 1 do
         local foundPiece = findPiece(x + i, y)
         if withinBoard(x + i, y) then
-            if foundPiece and (i == -1 or i == 1) then
+            if foundPiece and foundPiece.side ~= piece.side and
+                    (i == -1 or i == 1) then
                 add(moves, { x = x + i, y = y })
             elseif i == 0 and not foundPiece then
                 add(moves, { x = x, y = y })

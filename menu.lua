@@ -9,6 +9,10 @@ function menuInit()
     for i = 1, 7 do
         add(droplets, { x = rnd(128), y = i * -32 })
     end
+    
+    cameraOffsetX = 0
+    cameraOffsetY = 0
+    camera(0, 0)
 end
 
 function menuUpdate()

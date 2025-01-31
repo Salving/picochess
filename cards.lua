@@ -27,23 +27,27 @@ end
 function generateRandomHand(size)
     local hand = {}
     while #hand < size do
-        local v = rnd(PIECE_KING)
-        local pieceType = flr((v * v + 3) / 5)
-        v = rnd(CARD_TYPE_WALL )
-        local cardType = flr((v * v + 2) / 3 )
-        local targetType = flr(rnd(PIECE_KING + 1))
-
-        if pieceType == targetType or
-                cardType == CARD_TYPE_CONVERT and pieceType == PIECE_KING or
-                cardType == CARD_TYPE_CONVERT and targetType == PIECE_KING then
+        local card = generateRandomCard()
+        if card.pieceType == card.targetType or
+                card. cardType == CARD_TYPE_CONVERT and card.pieceType == PIECE_KING or
+                card.cardType == CARD_TYPE_CONVERT and card.targetType == PIECE_KING then
             goto continue
         end
-
-        add(hand, createCard(pieceType, cardType, targetType))
+        add(hand, card)
         :: continue ::
     end
 
     return hand
+end
+
+function generateRandomCard()
+    local v = rnd(PIECE_KING)
+    local pieceType = flr((v * v + 3) / 5)
+    v = rnd(CARD_TYPE_WALL)
+    local cardType = flr((v * v + 2) / 3)
+    local targetType = flr(rnd(PIECE_KING + 1))
+
+    return createCard(pieceType, cardType, targetType)
 end
 
 function drawHand(hand)

@@ -6,6 +6,9 @@ menuScene = {}
 
 currentScene = menuScene
 
+playerPieceCount = 0
+enemyPieceCount = 0
+
 function changeScene(scene)
     currentScene.clean()
     currentScene = scene
@@ -19,7 +22,7 @@ function gameInit()
     currentTurn = TURN_PLAYER
 
     playerHand = generateRandomHand(3)
-
+    
     initBoard()
     initDefaultPieces()
 end
@@ -66,6 +69,9 @@ function gameDraw()
     drawBoard()
     renderPieces()
     renderButtons()
+    
+    print(playerPieceCount, 8 + cameraOffsetX, 2 + cameraOffsetY, 14)
+    print(enemyPieceCount, 120 + cameraOffsetX, 2 + cameraOffsetY, 14)
 
     circfill(4 + cameraOffsetX, 4 + cameraOffsetY, 2, currentTurn + 7)
 
@@ -209,10 +215,10 @@ function getSelectablePieces(card, side)
 end
 
 function checkGameEnd()
-    local pl = #filterPiecesBySide(pieces, 0)
-    local en = #filterPiecesBySide(pieces, 1)
+    playerPieceCount = #filterPiecesBySide(pieces, 1)
+    enemyPieceCount = #filterPiecesBySide(pieces, 0)
 
-    if pl == 0 or en == 0 then
+    if playerPieceCount == 0 or enemyPieceCount == 0 then
         changeScene(menuScene)
     end
 end

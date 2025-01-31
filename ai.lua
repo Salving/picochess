@@ -4,28 +4,25 @@ local playerPieces = {}
 local playerAveragePosition = {x=0, y=0}
 
 function aiMakeTurn()
-    local enemyHand = generateRandomHand(5)
     playerPieces = filterPiecesBySide(pieces, 1)
     playerAveragePosition = averagePosition(playerPieces)
     
-    for card in all(enemyHand) do
+    local madeMoves = 0
+    while madeMoves < 5 do
+        local enemyHand = generateRandomHand(1)
+        local card = enemyHand[1]
         local selectable = getSelectablePieces(card, ENEMY_SIDE)
         local piece = rnd(keys(selectable))
 
         if piece then
-            --if card.cardType == CARD_TYPE_CONVERT and
-            --        piece.type > card.targetType then
-            --    goto continue
-            --end
-
             local moves = possibleMoves(piece, card)
             sortMoves(moves, piece)
             local chosenMove = moves[1]
             if chosenMove then
                 makeTurn(card, enemyHand, piece, chosenMove.x, chosenMove.y)
+                madeMoves = madeMoves + 1
             end
         end
-        :: continue ::
     end
 
     nextTurn()
@@ -56,7 +53,7 @@ end
 function moveScore(foundPiece, piece, move)
     local score = 0
     if foundPiece and foundPiece.side ~= 0 then
-        score = score + 1
+        score = score + 2
     end
     
     score = score + 1 / (abs(playerAveragePosition.x - move.x) + abs(playerAveragePosition.y - move.y))
